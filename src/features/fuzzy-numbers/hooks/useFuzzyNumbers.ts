@@ -1,16 +1,13 @@
 import { useState, useCallback } from 'react';
-import type { FuzzyNumber, FuzzyPoint } from '../types';
+import type { FuzzyNumber } from '../types';
+import type { FuzzyPoint } from '@/shared/types/fuzzy';
 import { validateFuzzyNumber, type ValidationResult } from '../utils/validation';
 import { generateRandomFuzzyPoints } from '../utils/generation';
-import { getLetterForIndex, MAX_FUZZY_NUMBERS } from '../utils/representation';
+import { useLetterCounter } from '@/shared/hooks/useLetterCounter';
 
 export function useFuzzyNumbers() {
   const [numbers, setNumbers] = useState<FuzzyNumber[]>([]);
-  // Monotonically increasing — never decremented when a number is deleted,
-  // so letters are never re-assigned after a deletion.
-  const [letterIndex, setLetterIndex] = useState(0);
-
-  const isAtCapacity = letterIndex >= MAX_FUZZY_NUMBERS;
+  const { nextLetter, isAtCapacity, increment } = useLetterCounter();
 
   const addNumber = useCallback(
     (points: FuzzyPoint[]): ValidationResult => {
@@ -18,13 +15,12 @@ export function useFuzzyNumbers() {
       if (!result.valid) return result;
 
       const sorted = [...points].sort((a, b) => a.x - b.x);
-      const letter = getLetterForIndex(letterIndex);
 
-      setNumbers((prev) => [...prev, { id: crypto.randomUUID(), letter, points: sorted }]);
-      setLetterIndex((prev) => prev + 1);
+      setNumbers((prev) => [...prev, { id: crypto.randomUUID(), letter: nextLetter, points: sorted }]);
+      increment();
       return { valid: true };
     },
-    [letterIndex],
+    [nextLetter, increment],
   );
 
   const removeNumber = useCallback((id: string) => {
