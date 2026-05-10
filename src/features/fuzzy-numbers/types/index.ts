@@ -1,10 +1,11 @@
-export type { FuzzyPoint } from '@/shared/types/fuzzy';
-import type { FuzzyPoint } from '@/shared/types/fuzzy';
+export type { FuzzyPoint, FuzzyItemFn } from '@/shared/types/fuzzy';
+import type { FuzzyPoint, FuzzyItemFn } from '@/shared/types/fuzzy';
 
 export interface FuzzyNumber {
   id: string;
   letter: string;
   points: FuzzyPoint[];
+  fn?: FuzzyItemFn;
 }
 
 export type OperationType = 'addition' | 'subtraction' | 'multiplication' | 'division';

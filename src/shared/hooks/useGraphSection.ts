@@ -8,6 +8,7 @@ export interface GraphSeries {
   letter: string;
   points: FuzzyPoint[];
   color: string;
+  showDots: boolean;
 }
 
 export interface GraphPanel {
@@ -36,7 +37,7 @@ export function useGraphSection() {
   }, []);
 
   const addSeriesToGraph = useCallback(
-    (graphId: string, itemId: string, letter: string, points: FuzzyPoint[]) => {
+    (graphId: string, itemId: string, letter: string, points: FuzzyPoint[], showDots = true) => {
       setGraphs((prev) =>
         prev.map((g) => {
           if (g.id !== graphId) return g;
@@ -47,6 +48,7 @@ export function useGraphSection() {
             letter,
             points,
             color: colorForItem(letter),
+            showDots,
           };
           return { ...g, series: [...g.series, newSeries] };
         })

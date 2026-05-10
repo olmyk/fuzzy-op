@@ -42,6 +42,7 @@ export interface SeriesData {
   letter: string;
   points: FuzzyPoint[];
   color: string;
+  showDots?: boolean;
 }
 
 interface Props {
@@ -105,7 +106,7 @@ export function MultiSeriesChart({ series, emptyText = 'Drop fuzzy items here to
                 opacity={0.85}
               />
             )}
-            {sorted.map((p, i) => (
+            {(s.showDots !== false) && sorted.map((p, i) => (
               <circle key={i} cx={toX(p.x)} cy={toY(p.mu)} r={3} fill={s.color} stroke="#fff" strokeWidth={1} />
             ))}
           </g>

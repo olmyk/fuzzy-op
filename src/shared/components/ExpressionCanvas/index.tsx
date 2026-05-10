@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { Box, Button, IconButton, Paper, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Paper, Typography } from '@mui/material';
 import { useDroppable } from '@dnd-kit/core';
 import { DND_IDS } from '@/config/dndIds';
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Chip, Container, Typography } from '@mui/material';
+import { Box, Button, ButtonGroup, Chip, Container, Typography } from '@mui/material';
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { useFuzzySets } from '../../hooks/useFuzzySets';
 import { useFuzzySetCanvas } from '../../hooks/useFuzzySetCanvas';
@@ -8,25 +8,41 @@ import type { SetCanvasToken } from '../../types';
 import type { FuzzyPoint } from '@/shared/types/fuzzy';
 import { evaluateSetExpression } from '../../utils/arithmetic';
 import { FuzzyItemForm } from '@/shared/components/FuzzyItemForm';
+import { FunctionForm } from '@/shared/components/FunctionForm';
 import { FuzzyItemList } from '@/shared/components/FuzzyItemList';
 import { ExpressionCanvas } from '@/shared/components/ExpressionCanvas';
 import { OutputCanvas } from '@/shared/components/OutputCanvas';
 import { GraphSection } from '@/shared/components/GraphSection';
 import { SetOperationsList } from '../SetOperationsList';
 import { DND_IDS } from '@/config/dndIds';
+import { FUNCTION_TYPES_FOR_SETS } from '@/shared/utils/membershipFunctions';
 
 export function FuzzySetsPage() {
   const { sets, addSet, addSetDirect, removeSet, generateRandom, isAtCapacity } = useFuzzySets();
-  const { tokens, canAcceptNext, addToken, removeToken, clearCanvas, isComplete } = useFuzzySetCanvas();
-  const { graphs, addGraph, removeGraph, addSeriesToGraph } = useGraphSection();
+  const [inputMode, setInputMode] = useState<'points' | 'function'>('points');
 
-  const [result, setResult] = useState<FuzzyPoint[] | null>(null);
-  const [calcError, setCalcError] = useState<string | null>(null);
+  const pointsCanvas = useFuzzySetCanvas();
+  const functionCanvas = useFuzzySetCanvas();
+  const pointsGraphs = useGraphSection();
+  const functionGraphs = useGraphSection();
 
-  useEffect(() => {
-    setResult(null);
-    setCalcError(null);
-  }, [tokens]);
+  const [pointsResult, setPointsResult] = useState<FuzzyPoint[] | null>(null);
+  const [pointsCalcError, setPointsCalcError] = useState<string | null>(null);
+  const [functionResult, setFunctionResult] = useState<FuzzyPoint[] | null>(null);
+  const [functionCalcError, setFunctionCalcError] = useState<string | null>(null);
+
+  useEffect(() => { setPointsResult(null); setPointsCalcError(null); }, [pointsCanvas.tokens]);
+  useEffect(() => { setFunctionResult(null); setFunctionCalcError(null); }, [functionCanvas.tokens]);
+
+  const isPoints = inputMode === 'points';
+  const { tokens, canAcceptNext, addToken, removeToken, clearCanvas, isComplete } =
+    isPoints ? pointsCanvas : functionCanvas;
+  const { graphs, addGraph, removeGraph, addSeriesToGraph } =
+    isPoints ? pointsGraphs : functionGraphs;
+  const result = isPoints ? pointsResult : functionResult;
+  const setResult = isPoints ? setPointsResult : setFunctionResult;
+  const calcError = isPoints ? pointsCalcError : functionCalcError;
+  const setCalcError = isPoints ? setPointsCalcError : setFunctionCalcError;
 
   const expressionLabel = tokens
     .map((t) => {
@@ -69,7 +85,7 @@ export function FuzzySetsPage() {
       const graphId = over.id.replace(DND_IDS.GRAPH_PANEL_PREFIX, '');
       if (data.kind === 'set') {
         const set = sets.find((s) => s.id === (data.fuzzySetId as string));
-        if (set) addSeriesToGraph(graphId, set.id, set.letter, set.points);
+        if (set) addSeriesToGraph(graphId, set.id, set.letter, set.points, !set.fn);
       }
       return;
     }
@@ -92,21 +108,48 @@ export function FuzzySetsPage() {
         </Typography>
 
         <Box sx={{ mb: 3 }}>
-          <FuzzyItemForm
-            title="Add Fuzzy Set"
-            onAdd={addSet}
-            onGenerateRandom={generateRandom}
-            isAtCapacity={isAtCapacity}
-            minPoints={1}
-            capacityMessage="Maximum of 26 fuzzy sets reached."
-          />
+          <Box sx={{ display: 'flex', gap: 1, mb: 1.5 }}>
+            <ButtonGroup size="small" variant="outlined">
+              <Button
+                variant={isPoints ? 'contained' : 'outlined'}
+                onClick={() => setInputMode('points')}
+              >
+                By Points
+              </Button>
+              <Button
+                variant={!isPoints ? 'contained' : 'outlined'}
+                onClick={() => setInputMode('function')}
+              >
+                By Function
+              </Button>
+            </ButtonGroup>
+          </Box>
+
+          {isPoints ? (
+            <FuzzyItemForm
+              title="Add Fuzzy Set"
+              onAdd={addSet}
+              onGenerateRandom={generateRandom}
+              isAtCapacity={isAtCapacity}
+              minPoints={1}
+              capacityMessage="Maximum of 26 fuzzy sets reached."
+            />
+          ) : (
+            <FunctionForm
+              title="Add Fuzzy Set"
+              allowedTypes={FUNCTION_TYPES_FOR_SETS}
+              onAdd={addSet}
+              isAtCapacity={isAtCapacity}
+              capacityMessage="Maximum of 26 fuzzy sets reached."
+            />
+          )}
         </Box>
 
         <Box sx={{ display: 'flex', gap: 2, mb: 3, minHeight: 280 }}>
           <Box sx={{ flex: 3, minWidth: 0 }}>
             <FuzzyItemList
               title="Fuzzy Sets"
-              items={sets}
+              items={sets.filter((s) => (isPoints ? !s.fn : !!s.fn))}
               buildDragId={(item) => `set-${item.id}`}
               buildDragData={(item) => ({ kind: 'set', fuzzySetId: item.id, letter: item.letter })}
               deleteDropZoneId={DND_IDS.SET_DELETE}
@@ -168,6 +211,7 @@ export function FuzzySetsPage() {
               dragKind="result-set"
               isAtCapacity={isAtCapacity}
               error={calcError}
+              showDots={isPoints}
             />
           </Box>
           <Box sx={{ flex: 2, minWidth: 0 }}>

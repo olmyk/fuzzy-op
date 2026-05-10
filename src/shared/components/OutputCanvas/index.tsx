@@ -53,6 +53,7 @@ interface Props {
   dragKind: string;
   isAtCapacity: boolean;
   error?: string | null;
+  showDots?: boolean;
 }
 
 export function OutputCanvas({
@@ -62,6 +63,7 @@ export function OutputCanvas({
   dragKind,
   isAtCapacity,
   error,
+  showDots = true,
 }: Props) {
   const hasContent = result !== null || !!error;
 
@@ -93,7 +95,7 @@ export function OutputCanvas({
       {result && !error && (
         <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <Box sx={{ flexShrink: 0 }}>
-            <MembershipChart points={result} />
+            <MembershipChart points={result} showDots={showDots} />
           </Box>
 
           <Box sx={{ flex: 1, minWidth: 200 }}>

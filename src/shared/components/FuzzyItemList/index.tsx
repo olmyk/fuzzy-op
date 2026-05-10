@@ -15,7 +15,7 @@ interface DraggableItemProps {
 }
 
 function DraggableItem({ item, dragId, dragData }: DraggableItemProps) {
-  const representation = toSetNotation(item.points);
+  const representation = item.fn ? item.fn.label : toSetNotation(item.points);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: dragId,
     data: dragData,

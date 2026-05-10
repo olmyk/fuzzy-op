@@ -12,9 +12,10 @@ const PH = CH - PT - PB;
 
 interface Props {
   points: FuzzyPoint[];
+  showDots?: boolean;
 }
 
-export function MembershipChart({ points }: Props) {
+export function MembershipChart({ points, showDots = true }: Props) {
   const sorted = [...points].sort((a, b) => a.x - b.x);
   const hasPoints = sorted.length > 0;
 
@@ -82,7 +83,7 @@ export function MembershipChart({ points }: Props) {
         />
       )}
 
-      {sorted.map((p, i) => (
+      {showDots && sorted.map((p, i) => (
         <circle key={i} cx={toX(p.x)} cy={toY(p.mu)} r={4} fill="#1976d2" stroke="#fff" strokeWidth={1.5} />
       ))}
 

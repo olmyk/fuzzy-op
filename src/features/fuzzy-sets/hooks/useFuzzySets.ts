@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { FuzzySet } from '../types';
-import type { FuzzyPoint } from '@/shared/types/fuzzy';
+import type { FuzzyPoint, FuzzyItemFn } from '@/shared/types/fuzzy';
 import { generateRandomFuzzyPoints } from '../utils/generation';
 import { nextAvailableLetter } from '@/shared/utils/representation';
 
@@ -11,12 +11,14 @@ export function useFuzzySets() {
   const isAtCapacity = nextLetter === null;
 
   const addSet = useCallback(
-    (points: FuzzyPoint[]): string | null => {
+    (points: FuzzyPoint[], fn?: FuzzyItemFn): string | null => {
       if (points.length < 1) return 'A fuzzy set requires at least 1 point.';
       if (!nextLetter) return 'Maximum of 26 fuzzy sets reached.';
 
       const sorted = [...points].sort((a, b) => a.x - b.x);
-      setSets((prev) => [...prev, { id: crypto.randomUUID(), letter: nextLetter, points: sorted }]);
+      const item: FuzzySet = { id: crypto.randomUUID(), letter: nextLetter, points: sorted };
+      if (fn) item.fn = fn;
+      setSets((prev) => [...prev, item]);
       return null;
     },
     [nextLetter],
