@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { Box, Button, Paper, Typography } from '@mui/material';
+import { Box, Button, IconButton, Paper, Tooltip, Typography } from '@mui/material';
 import { useDroppable } from '@dnd-kit/core';
 import { DND_IDS } from '@/config/dndIds';
 
@@ -39,7 +39,7 @@ export function ExpressionCanvas({
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
       <Typography variant="h6" gutterBottom>
-        Expression Canvas
+        Expression
       </Typography>
 
       <Box
@@ -70,7 +70,7 @@ export function ExpressionCanvas({
 
       <Box sx={{ mt: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Button size="small" variant="text" color="error" onClick={onClear} disabled={tokens.length === 0}>
-          Clear Canvas
+          Clear
         </Button>
         {onCalculate && (
           <Button size="small" variant="contained" onClick={onCalculate} disabled={!canCalculate}>

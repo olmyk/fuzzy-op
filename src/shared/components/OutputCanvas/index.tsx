@@ -11,6 +11,14 @@ interface DraggableResultProps {
   points: FuzzyPoint[];
 }
 
+function ListAddIcon() {
+  return (
+    <svg width="18" height="14" viewBox="0 0 10 24" fill="currentColor" aria-hidden="true">
+      <path d="M14 10H3v2h11v-2zm0-4H3v2h11V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM3 16h7v-2H3v2z" />
+    </svg>
+  );
+}
+
 function DraggableResult({ draggableId, dragKind, points }: DraggableResultProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: draggableId,
@@ -22,9 +30,11 @@ function DraggableResult({ draggableId, dragKind, points }: DraggableResultProps
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      label="Result — drag to list"
+      icon={<ListAddIcon />}
+      label="drag to list"
       variant="outlined"
       color="success"
+      size="small"
       sx={{
         cursor: 'grab',
         fontWeight: 600,
@@ -57,9 +67,18 @@ export function OutputCanvas({
 
   return (
     <Paper variant="outlined" sx={{ p: 2, mt: 2, minHeight: 292.6 }}>
-      <Typography variant="h6" gutterBottom>
-        Output
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+        <Typography variant="h6">Output</Typography>
+        {result && !error && (
+          isAtCapacity ? (
+            <Typography variant="caption" color="text.secondary">
+              List is at capacity — cannot add result.
+            </Typography>
+          ) : (
+            <DraggableResult draggableId={draggableId} dragKind={dragKind} points={result} />
+          )
+        )}
+      </Box>
 
       {!hasContent && (
         <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
@@ -95,17 +114,6 @@ export function OutputCanvas({
               {toSetNotation(result)}
             </Typography>
 
-            {isAtCapacity ? (
-              <Typography variant="caption" color="text.secondary">
-                List is at capacity — cannot add result.
-              </Typography>
-            ) : (
-              <DraggableResult
-                draggableId={draggableId}
-                dragKind={dragKind}
-                points={result}
-              />
-            )}
           </Box>
         </Box>
       )}

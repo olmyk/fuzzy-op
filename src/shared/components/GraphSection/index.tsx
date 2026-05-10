@@ -35,12 +35,15 @@ export function GraphSection({ graphs, onAddGraph }: Props) {
       variant="outlined"
       sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column', gap: 1.5 }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography variant="h6">Graphs</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography variant="h6" sx={{ flex: 1 }}>Graphs</Typography>
         {isDraggingGraph && <DeleteDropZone droppableId={DND_IDS.GRAPH_DELETE} />}
+        <Button variant="outlined" onClick={onAddGraph} startIcon={<PlusIcon />} size="small">
+          Add Graph
+        </Button>
       </Box>
 
-      <Box sx={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, overflow: isDraggingGraph ? 'hidden' : 'auto', }}>
         {graphs.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', p: 1 }}>
             Add a graph panel and drop fuzzy items onto it.
@@ -51,16 +54,6 @@ export function GraphSection({ graphs, onAddGraph }: Props) {
           ))
         )}
       </Box>
-
-      <Button
-        variant="outlined"
-        fullWidth
-        onClick={onAddGraph}
-        startIcon={<PlusIcon />}
-        size="small"
-      >
-        Add Graph
-      </Button>
     </Paper>
   );
 }
