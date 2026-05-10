@@ -42,8 +42,8 @@ export function FuzzyItemForm({
       setXError(null);
     }
 
-    if (isNaN(mu) || mu < 0 || mu > 1) {
-      setMuError('µ must be between 0 and 1.');
+    if (isNaN(mu) || mu <= 0 || mu > 1) {
+      setMuError('µ must be > 0 and ≤ 1.');
       hasError = true;
     } else {
       setMuError(null);
@@ -103,10 +103,10 @@ export function FuzzyItemForm({
               sx={{ width: 140 }}
             />
             <TextField
-              label="µ (0 – 1)"
+              label="µ (0, 1]"
               type="number"
               size="small"
-              slotProps={{ htmlInput: { min: 0, max: 1, step: 0.01 } }}
+              slotProps={{ htmlInput: { min: 0.01, max: 1, step: 0.01 } }}
               value={muInput}
               onChange={(e) => setMuInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddPoint()}

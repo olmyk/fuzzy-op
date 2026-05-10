@@ -3,21 +3,21 @@ import { interpolateMu, mergeXValues } from '@/shared/utils/interpolation';
 import type { FuzzySet, SetCanvasToken } from '../types';
 
 export function complementSet(a: FuzzyPoint[]): FuzzyPoint[] {
-  return a.map((p) => ({ x: p.x, mu: Math.round((1 - p.mu) * 10000) / 10000 }));
+  return a
+    .map((p) => ({ x: p.x, mu: Math.round((1 - p.mu) * 10000) / 10000 }))
+    .filter((p) => p.mu > 0);
 }
 
 export function unionSets(a: FuzzyPoint[], b: FuzzyPoint[]): FuzzyPoint[] {
-  return mergeXValues(a, b).map((x) => ({
-    x,
-    mu: Math.max(interpolateMu(a, x), interpolateMu(b, x)),
-  }));
+  return mergeXValues(a, b)
+    .map((x) => ({ x, mu: Math.max(interpolateMu(a, x), interpolateMu(b, x)) }))
+    .filter((p) => p.mu > 0);
 }
 
 export function intersectSets(a: FuzzyPoint[], b: FuzzyPoint[]): FuzzyPoint[] {
-  return mergeXValues(a, b).map((x) => ({
-    x,
-    mu: Math.min(interpolateMu(a, x), interpolateMu(b, x)),
-  }));
+  return mergeXValues(a, b)
+    .map((x) => ({ x, mu: Math.min(interpolateMu(a, x), interpolateMu(b, x)) }))
+    .filter((p) => p.mu > 0);
 }
 
 function buildSetLabel(tokens: SetCanvasToken[], sets: FuzzySet[]): string {

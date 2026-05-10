@@ -45,6 +45,7 @@ export function applyFuzzyNumberOp(
 
   return [...resultMap.entries()]
     .map(([x, mu]) => ({ x, mu }))
+    .filter((p) => p.mu > 0)
     .sort((a, b) => a.x - b.x);
 }
 

@@ -108,13 +108,7 @@ export function FuzzyNumbersPage() {
         </Box>
 
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'stretch' }}>
-          <Box sx={{ flex: 3, minWidth: 0 }}>
-            <GraphSection
-              graphs={graphs}
-              onAddGraph={addGraph}
-            />
-          </Box>
-          <Box sx={{ flex: 2, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <ExpressionCanvas
               tokens={tokens}
               onRemoveToken={removeToken}
@@ -130,6 +124,12 @@ export function FuzzyNumbersPage() {
               dragKind="result-number"
               isAtCapacity={isAtCapacity}
               error={calcError}
+            />
+          </Box>
+          <Box sx={{ flex: 2, minWidth: 0 }}>
+            <GraphSection
+              graphs={graphs}
+              onAddGraph={addGraph}
             />
           </Box>
         </Box>
