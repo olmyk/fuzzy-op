@@ -3,6 +3,7 @@ import { Box, Container, Typography } from '@mui/material';
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { useFuzzyNumbers } from '../../hooks/useFuzzyNumbers';
 import { useCanvas } from '../../hooks/useCanvas';
+import { useGraphSection } from '@/shared/hooks/useGraphSection';
 import type { CanvasToken } from '../../types';
 import type { FuzzyPoint } from '@/shared/types/fuzzy';
 import { evaluateFuzzyExpression } from '../../utils/arithmetic';
@@ -11,15 +12,16 @@ import { FuzzyNumberList } from '../FuzzyNumberList';
 import { OperationsList } from '../OperationsList';
 import { ExpressionCanvas } from '../ExpressionCanvas';
 import { OutputCanvas } from '@/shared/components/OutputCanvas';
+import { GraphSection } from '@/shared/components/GraphSection';
 
 export function FuzzyNumbersPage() {
   const { numbers, addNumber, addNumberDirect, removeNumber, generateRandom, isAtCapacity } = useFuzzyNumbers();
   const { tokens, canAcceptNext, addToken, removeToken, clearCanvas, isComplete } = useCanvas();
+  const { graphs, addGraph, removeGraph, addSeriesToGraph } = useGraphSection();
 
   const [result, setResult] = useState<FuzzyPoint[] | null>(null);
   const [calcError, setCalcError] = useState<string | null>(null);
 
-  // Clear result whenever the expression changes
   useEffect(() => {
     setResult(null);
     setCalcError(null);
@@ -62,6 +64,20 @@ export function FuzzyNumbersPage() {
       return;
     }
 
+    if (typeof over.id === 'string' && over.id.startsWith('graph-panel-')) {
+      const graphId = over.id.replace('graph-panel-', '');
+      if (data.kind === 'number') {
+        const num = numbers.find((n) => n.id === (data.fuzzyNumberId as string));
+        if (num) addSeriesToGraph(graphId, num.id, num.letter, num.points);
+      }
+      return;
+    }
+
+    if (over.id === 'graph-delete-zone') {
+      if (data.kind === 'graph') removeGraph(data.graphId as string);
+      return;
+    }
+
     if (over.id === 'canvas-droppable') {
       addToken(data as Omit<CanvasToken, 'instanceId'>);
     }
@@ -91,23 +107,32 @@ export function FuzzyNumbersPage() {
           </Box>
         </Box>
 
-        <ExpressionCanvas
-          tokens={tokens}
-          onRemoveToken={removeToken}
-          onClear={clearCanvas}
-          canAcceptNext={canAcceptNext}
-          onCalculate={handleCalculate}
-          canCalculate={isComplete}
-        />
-
-        <OutputCanvas
-          result={result}
-          expressionLabel={expressionLabel}
-          draggableId="num-result-drag"
-          dragKind="result-number"
-          isAtCapacity={isAtCapacity}
-          error={calcError}
-        />
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'stretch' }}>
+          <Box sx={{ flex: 3, minWidth: 0 }}>
+            <GraphSection
+              graphs={graphs}
+              onAddGraph={addGraph}
+            />
+          </Box>
+          <Box sx={{ flex: 2, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <ExpressionCanvas
+              tokens={tokens}
+              onRemoveToken={removeToken}
+              onClear={clearCanvas}
+              canAcceptNext={canAcceptNext}
+              onCalculate={handleCalculate}
+              canCalculate={isComplete}
+            />
+            <OutputCanvas
+              result={result}
+              expressionLabel={expressionLabel}
+              draggableId="num-result-drag"
+              dragKind="result-number"
+              isAtCapacity={isAtCapacity}
+              error={calcError}
+            />
+          </Box>
+        </Box>
       </Container>
     </DndContext>
   );

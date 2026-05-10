@@ -3,24 +3,25 @@ import type { FuzzyNumber } from '../types';
 import type { FuzzyPoint } from '@/shared/types/fuzzy';
 import { validateFuzzyNumber, type ValidationResult } from '../utils/validation';
 import { generateRandomFuzzyPoints } from '../utils/generation';
-import { useLetterCounter } from '@/shared/hooks/useLetterCounter';
+import { nextAvailableLetter } from '@/shared/utils/representation';
 
 export function useFuzzyNumbers() {
   const [numbers, setNumbers] = useState<FuzzyNumber[]>([]);
-  const { nextLetter, isAtCapacity, increment } = useLetterCounter();
+
+  const nextLetter = nextAvailableLetter(numbers.map((n) => n.letter));
+  const isAtCapacity = nextLetter === null;
 
   const addNumber = useCallback(
     (points: FuzzyPoint[]): ValidationResult => {
       const result = validateFuzzyNumber(points);
       if (!result.valid) return result;
+      if (!nextLetter) return { valid: false, reason: 'too-few-points' };
 
       const sorted = [...points].sort((a, b) => a.x - b.x);
-
       setNumbers((prev) => [...prev, { id: crypto.randomUUID(), letter: nextLetter, points: sorted }]);
-      increment();
       return { valid: true };
     },
-    [nextLetter, increment],
+    [nextLetter],
   );
 
   const removeNumber = useCallback((id: string) => {
@@ -29,12 +30,11 @@ export function useFuzzyNumbers() {
 
   const addNumberDirect = useCallback(
     (points: FuzzyPoint[]): void => {
-      if (isAtCapacity) return;
+      if (!nextLetter) return;
       const sorted = [...points].sort((a, b) => a.x - b.x);
       setNumbers((prev) => [...prev, { id: crypto.randomUUID(), letter: nextLetter, points: sorted }]);
-      increment();
     },
-    [nextLetter, increment, isAtCapacity],
+    [nextLetter],
   );
 
   const generateRandom = useCallback((): ValidationResult => {

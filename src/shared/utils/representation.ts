@@ -15,3 +15,12 @@ export function getLetterForIndex(i: number): string {
 }
 
 export const MAX_FUZZY_ITEMS = 26;
+
+export function nextAvailableLetter(usedLetters: string[]): string | null {
+  const used = new Set(usedLetters);
+  for (let i = 0; i < MAX_FUZZY_ITEMS; i++) {
+    const letter = getLetterForIndex(i);
+    if (!used.has(letter)) return letter;
+  }
+  return null;
+}

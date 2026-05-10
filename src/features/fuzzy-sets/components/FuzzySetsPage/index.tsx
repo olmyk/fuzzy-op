@@ -4,6 +4,7 @@ import { Box, Container, Typography } from '@mui/material';
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { useFuzzySets } from '../../hooks/useFuzzySets';
 import { useFuzzySetCanvas } from '../../hooks/useFuzzySetCanvas';
+import { useGraphSection } from '@/shared/hooks/useGraphSection';
 import type { SetCanvasToken } from '../../types';
 import type { FuzzyPoint } from '@/shared/types/fuzzy';
 import { evaluateSetExpression } from '../../utils/arithmetic';
@@ -11,11 +12,13 @@ import { FuzzyItemForm } from '@/shared/components/FuzzyItemForm';
 import { FuzzyItemList } from '@/shared/components/FuzzyItemList';
 import { ExpressionCanvas } from '@/shared/components/ExpressionCanvas';
 import { OutputCanvas } from '@/shared/components/OutputCanvas';
+import { GraphSection } from '@/shared/components/GraphSection';
 import { SetOperationsList } from '../SetOperationsList';
 
 export function FuzzySetsPage() {
   const { sets, addSet, addSetDirect, removeSet, generateRandom, isAtCapacity } = useFuzzySets();
   const { tokens, canAcceptNext, addToken, removeToken, clearCanvas, isComplete } = useFuzzySetCanvas();
+  const { graphs, addGraph, removeGraph, addSeriesToGraph } = useGraphSection();
 
   const [result, setResult] = useState<FuzzyPoint[] | null>(null);
   const [calcError, setCalcError] = useState<string | null>(null);
@@ -62,6 +65,20 @@ export function FuzzySetsPage() {
       return;
     }
 
+    if (typeof over.id === 'string' && over.id.startsWith('graph-panel-')) {
+      const graphId = over.id.replace('graph-panel-', '');
+      if (data.kind === 'set') {
+        const set = sets.find((s) => s.id === (data.fuzzySetId as string));
+        if (set) addSeriesToGraph(graphId, set.id, set.letter, set.points);
+      }
+      return;
+    }
+
+    if (over.id === 'graph-delete-zone') {
+      if (data.kind === 'graph') removeGraph(data.graphId as string);
+      return;
+    }
+
     if (over.id === 'set-canvas-droppable') {
       addToken(data as Omit<SetCanvasToken, 'instanceId'>);
     }
@@ -102,55 +119,64 @@ export function FuzzySetsPage() {
           </Box>
         </Box>
 
-        <ExpressionCanvas
-          tokens={tokens}
-          onClear={clearCanvas}
-          canAcceptNext={canAcceptNext}
-          onCalculate={handleCalculate}
-          canCalculate={isComplete}
-          droppableId="set-canvas-droppable"
-          emptyText="Drag fuzzy sets and operations here to build an expression."
-          renderToken={(token) => {
-            const t = token as SetCanvasToken;
-            if (t.kind === 'set') {
-              return (
-                <Chip
-                  label={t.letter}
-                  onDelete={() => removeToken(t.instanceId)}
-                  color="primary"
-                  sx={{ fontWeight: 700, fontSize: '1rem' }}
-                />
-              );
-            }
-            if (t.kind === 'complement') {
-              return (
-                <Chip
-                  label={t.symbol}
-                  onDelete={() => removeToken(t.instanceId)}
-                  color="secondary"
-                  sx={{ fontWeight: 700, fontSize: '1rem' }}
-                />
-              );
-            }
-            return (
-              <Chip
-                label={t.symbol}
-                onDelete={() => removeToken(t.instanceId)}
-                variant="outlined"
-                sx={{ fontWeight: 700, fontSize: '1rem' }}
-              />
-            );
-          }}
-        />
-
-        <OutputCanvas
-          result={result}
-          expressionLabel={expressionLabel}
-          draggableId="set-result-drag"
-          dragKind="result-set"
-          isAtCapacity={isAtCapacity}
-          error={calcError}
-        />
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'stretch' }}>
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <ExpressionCanvas
+              tokens={tokens}
+              onClear={clearCanvas}
+              canAcceptNext={canAcceptNext}
+              onCalculate={handleCalculate}
+              canCalculate={isComplete}
+              droppableId="set-canvas-droppable"
+              emptyText="Drag fuzzy sets and operations here to build an expression."
+              renderToken={(token) => {
+                const t = token as SetCanvasToken;
+                if (t.kind === 'set') {
+                  return (
+                    <Chip
+                      label={t.letter}
+                      onDelete={() => removeToken(t.instanceId)}
+                      color="primary"
+                      sx={{ fontWeight: 700, fontSize: '1rem' }}
+                    />
+                  );
+                }
+                if (t.kind === 'complement') {
+                  return (
+                    <Chip
+                      label={t.symbol}
+                      onDelete={() => removeToken(t.instanceId)}
+                      color="secondary"
+                      sx={{ fontWeight: 700, fontSize: '1rem' }}
+                    />
+                  );
+                }
+                return (
+                  <Chip
+                    label={t.symbol}
+                    onDelete={() => removeToken(t.instanceId)}
+                    variant="outlined"
+                    sx={{ fontWeight: 700, fontSize: '1rem' }}
+                  />
+                );
+              }}
+            />
+            <OutputCanvas
+              result={result}
+              expressionLabel={expressionLabel}
+              draggableId="set-result-drag"
+              dragKind="result-set"
+              isAtCapacity={isAtCapacity}
+              error={calcError}
+            />
+          </Box>
+          <Box sx={{ flex: 2, minWidth: 0 }}>
+            <GraphSection
+              graphs={graphs}
+              onAddGraph={addGraph}
+            />
+          </Box>
+        </Box>
       </Container>
     </DndContext>
   );
