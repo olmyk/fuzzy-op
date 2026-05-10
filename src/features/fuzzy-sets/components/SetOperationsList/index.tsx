@@ -15,7 +15,12 @@ const SET_OPERATIONS: SetOp[] = [
   { kind: 'complement', symbol: '∁', label: 'Complement', description: 'Unary prefix — ∁A: 1 − µA for each x' },
 ];
 
-function DraggableSetOp({ op }: { op: SetOp }) {
+interface DraggableSetOpProps {
+  op: SetOp;
+  onAdd?: (data: { kind: SetOp['kind']; symbol: string }) => void;
+}
+
+function DraggableSetOp({ op, onAdd }: DraggableSetOpProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `setop-${op.kind}`,
     data: { kind: op.kind, symbol: op.symbol },
@@ -28,6 +33,7 @@ function DraggableSetOp({ op }: { op: SetOp }) {
         {...listeners}
         {...attributes}
         disablePadding
+        onDoubleClick={() => onAdd?.({ kind: op.kind, symbol: op.symbol })}
         sx={{
           px: 1.5,
           py: 0.75,
@@ -60,7 +66,11 @@ function DraggableSetOp({ op }: { op: SetOp }) {
   );
 }
 
-export function SetOperationsList() {
+interface Props {
+  onAdd?: (data: { kind: SetOp['kind']; symbol: string }) => void;
+}
+
+export function SetOperationsList({ onAdd }: Props) {
   return (
     <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Typography variant="h6" gutterBottom>
@@ -68,7 +78,7 @@ export function SetOperationsList() {
       </Typography>
       <List dense disablePadding>
         {SET_OPERATIONS.map((op) => (
-          <DraggableSetOp key={op.kind} op={op} />
+          <DraggableSetOp key={op.kind} op={op} onAdd={onAdd} />
         ))}
       </List>
     </Paper>

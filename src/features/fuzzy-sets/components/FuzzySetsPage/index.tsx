@@ -98,7 +98,7 @@ export function FuzzySetsPage() {
             />
           </Box>
           <Box sx={{ flex: 2, minWidth: 0 }}>
-            <SetOperationsList />
+            <SetOperationsList onAdd={addToken} />
           </Box>
         </Box>
 

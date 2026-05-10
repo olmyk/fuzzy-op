@@ -87,7 +87,7 @@ export function FuzzyNumbersPage() {
             <FuzzyNumberList numbers={numbers} addDropZoneId="num-add-zone" />
           </Box>
           <Box sx={{ flex: 2, minWidth: 0 }}>
-            <OperationsList />
+            <OperationsList onAdd={addToken} />
           </Box>
         </Box>
 

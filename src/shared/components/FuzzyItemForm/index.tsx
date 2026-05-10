@@ -59,6 +59,7 @@ export function FuzzyItemForm({
 
   function handleRemovePoint(index: number) {
     setDraftPoints((prev) => prev.filter((_, i) => i !== index));
+    setSubmitError(null);
   }
 
   function handleSubmit() {
@@ -81,7 +82,7 @@ export function FuzzyItemForm({
       </Typography>
 
       <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
           {isAtCapacity && (
             <Alert severity="info" sx={{ mb: 2 }}>
               {capacityMessage}
@@ -119,28 +120,28 @@ export function FuzzyItemForm({
             </Button>
           </Box>
 
-          {draftPoints.length > 0 && (
-            <Box sx={{ mt: 2, display: 'flex', flexWrap: 'nowrap', gap: 1, overflowX: 'auto', pb: 0.5 }}>
-              {draftPoints.map((p, i) => (
-                <Chip
-                  key={i}
-                  label={`(${p.x}, ${p.mu})`}
-                  onDelete={() => handleRemovePoint(i)}
-                  variant="outlined"
-                  size="small"
-                  sx={{ fontFamily: 'monospace', flexShrink: 0 }}
-                />
-              ))}
-            </Box>
-          )}
+          <Box sx={{ mt: 2, display: 'flex', flexWrap: 'nowrap', gap: 1, overflowX: 'auto', pb: 0.5, minHeight: 130 }}>
+            {draftPoints.map((p, i) => (
+              <Chip
+                key={i}
+                label={`(${p.x}, ${p.mu})`}
+                onDelete={() => handleRemovePoint(i)}
+                variant="outlined"
+                size="small"
+                sx={{ fontFamily: 'monospace', flexShrink: 0 }}
+              />
+            ))}
+          </Box>
 
-          {submitError && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {submitError}
-            </Alert>
-          )}
+          <Box sx={{ minHeight: 70 }}>
+            {submitError && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {submitError}
+              </Alert>
+            )}
+          </Box>
 
-          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2, mt: 'auto', pt: 2 }}>
             <Button variant="outlined" onClick={onGenerateRandom} disabled={disabled}>
               Generate Random
             </Button>
