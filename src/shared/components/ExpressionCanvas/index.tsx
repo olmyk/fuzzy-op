@@ -12,6 +12,8 @@ interface Props {
   onClear: () => void;
   canAcceptNext: (kind: string) => boolean;
   renderToken: (token: Token) => ReactNode;
+  onCalculate?: () => void;
+  canCalculate?: boolean;
   droppableId?: string;
   emptyText?: string;
 }
@@ -21,6 +23,8 @@ export function ExpressionCanvas({
   onClear,
   canAcceptNext,
   renderToken,
+  onCalculate,
+  canCalculate = false,
   droppableId = 'canvas-droppable',
   emptyText = 'Drag items here to build an expression.',
 }: Props) {
@@ -63,10 +67,15 @@ export function ExpressionCanvas({
         ))}
       </Box>
 
-      <Box sx={{ mt: 1.5, display: 'flex', justifyContent: 'flex-end' }}>
+      <Box sx={{ mt: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Button size="small" variant="text" color="error" onClick={onClear} disabled={tokens.length === 0}>
           Clear Canvas
         </Button>
+        {onCalculate && (
+          <Button size="small" variant="contained" onClick={onCalculate} disabled={!canCalculate}>
+            Calculate
+          </Button>
+        )}
       </Box>
     </Paper>
   );

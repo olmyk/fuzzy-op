@@ -6,6 +6,7 @@ import type { FuzzyItem } from '@/shared/types/fuzzy';
 import { toSetNotation } from '@/shared/utils/representation';
 import { MiniChart } from '@/shared/components/MiniChart';
 import { DeleteDropZone } from '@/shared/components/DeleteDropZone';
+import { AddDropZone } from '@/shared/components/AddDropZone';
 
 interface DraggableItemProps {
   item: FuzzyItem;
@@ -67,6 +68,7 @@ interface Props {
   buildDragId: (item: FuzzyItem) => string;
   buildDragData: (item: FuzzyItem) => Record<string, unknown>;
   deleteDropZoneId?: string;
+  addDropZoneId?: string;
   emptyText?: string;
 }
 
@@ -76,25 +78,30 @@ export function FuzzyItemList({
   buildDragId,
   buildDragData,
   deleteDropZoneId = 'delete-zone',
+  addDropZoneId,
   emptyText = 'No items yet.',
 }: Props) {
   const [isDragging, setIsDragging] = useState(false);
-  const [isDraggingItem, setIsDraggingItem] = useState(false);
+  const [isDraggingToDelete, setIsDraggingToDelete] = useState(false);
+  const [isDraggingToAdd, setIsDraggingToAdd] = useState(false);
 
   useDndMonitor({
     onDragStart: (event: DragStartEvent) => {
+      const kind = event.active.data.current?.kind as string | undefined;
       setIsDragging(true);
-      setIsDraggingItem(event.active.data.current?.kind !== 'operation');
+      setIsDraggingToDelete(kind === 'number' || kind === 'set');
+      setIsDraggingToAdd(kind === 'result-number' || kind === 'result-set');
     },
-    onDragEnd: () => { setIsDragging(false); setIsDraggingItem(false); },
-    onDragCancel: () => { setIsDragging(false); setIsDraggingItem(false); },
+    onDragEnd: () => { setIsDragging(false); setIsDraggingToDelete(false); setIsDraggingToAdd(false); },
+    onDragCancel: () => { setIsDragging(false); setIsDraggingToDelete(false); setIsDraggingToAdd(false); },
   });
 
   return (
     <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="h6">{title}</Typography>
-        {isDraggingItem && <DeleteDropZone droppableId={deleteDropZoneId} />}
+        {isDraggingToDelete && <DeleteDropZone droppableId={deleteDropZoneId} />}
+        {isDraggingToAdd && addDropZoneId && <AddDropZone droppableId={addDropZoneId} />}
       </Box>
 
       {items.length === 0 ? (

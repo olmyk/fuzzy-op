@@ -27,11 +27,21 @@ export function useFuzzyNumbers() {
     setNumbers((prev) => prev.filter((n) => n.id !== id));
   }, []);
 
+  const addNumberDirect = useCallback(
+    (points: FuzzyPoint[]): void => {
+      if (isAtCapacity) return;
+      const sorted = [...points].sort((a, b) => a.x - b.x);
+      setNumbers((prev) => [...prev, { id: crypto.randomUUID(), letter: nextLetter, points: sorted }]);
+      increment();
+    },
+    [nextLetter, increment, isAtCapacity],
+  );
+
   const generateRandom = useCallback((): ValidationResult => {
     if (isAtCapacity) return { valid: false, reason: 'too-few-points' };
     const points = generateRandomFuzzyPoints();
     return addNumber(points);
   }, [addNumber, isAtCapacity]);
 
-  return { numbers, addNumber, removeNumber, generateRandom, isAtCapacity };
+  return { numbers, addNumber, addNumberDirect, removeNumber, generateRandom, isAtCapacity };
 }

@@ -85,5 +85,7 @@ export function useFuzzySetCanvas() {
 
   const clearCanvas = useCallback(() => setTokens([]), []);
 
-  return { tokens, canAcceptNext, addToken, removeToken, clearCanvas };
+  const isComplete = tokens.length > 0 && tokens[tokens.length - 1].kind === 'set';
+
+  return { tokens, canAcceptNext, addToken, removeToken, clearCanvas, isComplete };
 }

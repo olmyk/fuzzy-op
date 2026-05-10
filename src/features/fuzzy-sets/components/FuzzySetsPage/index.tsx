@@ -1,17 +1,50 @@
+import { useState, useEffect } from 'react';
 import { Chip } from '@mui/material';
 import { Box, Container, Typography } from '@mui/material';
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { useFuzzySets } from '../../hooks/useFuzzySets';
 import { useFuzzySetCanvas } from '../../hooks/useFuzzySetCanvas';
 import type { SetCanvasToken } from '../../types';
+import type { FuzzyPoint } from '@/shared/types/fuzzy';
+import { evaluateSetExpression } from '../../utils/arithmetic';
 import { FuzzyItemForm } from '@/shared/components/FuzzyItemForm';
 import { FuzzyItemList } from '@/shared/components/FuzzyItemList';
 import { ExpressionCanvas } from '@/shared/components/ExpressionCanvas';
+import { OutputCanvas } from '@/shared/components/OutputCanvas';
 import { SetOperationsList } from '../SetOperationsList';
 
 export function FuzzySetsPage() {
-  const { sets, addSet, removeSet, generateRandom, isAtCapacity } = useFuzzySets();
-  const { tokens, canAcceptNext, addToken, removeToken, clearCanvas } = useFuzzySetCanvas();
+  const { sets, addSet, addSetDirect, removeSet, generateRandom, isAtCapacity } = useFuzzySets();
+  const { tokens, canAcceptNext, addToken, removeToken, clearCanvas, isComplete } = useFuzzySetCanvas();
+
+  const [result, setResult] = useState<FuzzyPoint[] | null>(null);
+  const [calcError, setCalcError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setResult(null);
+    setCalcError(null);
+  }, [tokens]);
+
+  const expressionLabel = tokens
+    .map((t) => {
+      if (t.kind === 'set') {
+        const s = sets.find((s) => s.id === t.fuzzySetId);
+        return s?.letter ?? '?';
+      }
+      return t.symbol;
+    })
+    .join(' ');
+
+  function handleCalculate() {
+    const outcome = evaluateSetExpression(tokens, sets);
+    if ('error' in outcome) {
+      setCalcError(outcome.error);
+      setResult(null);
+    } else {
+      setResult(outcome.result);
+      setCalcError(null);
+    }
+  }
 
   function handleDragEnd(event: DragEndEvent) {
     const { over, active } = event;
@@ -21,6 +54,11 @@ export function FuzzySetsPage() {
 
     if (over.id === 'set-delete-zone') {
       if (data.kind === 'set') removeSet(data.fuzzySetId as string);
+      return;
+    }
+
+    if (over.id === 'set-add-zone') {
+      if (data.kind === 'result-set') addSetDirect(data.points as FuzzyPoint[]);
       return;
     }
 
@@ -55,6 +93,7 @@ export function FuzzySetsPage() {
               buildDragId={(item) => `set-${item.id}`}
               buildDragData={(item) => ({ kind: 'set', fuzzySetId: item.id, letter: item.letter })}
               deleteDropZoneId="set-delete-zone"
+              addDropZoneId="set-add-zone"
               emptyText="No fuzzy sets yet."
             />
           </Box>
@@ -67,6 +106,8 @@ export function FuzzySetsPage() {
           tokens={tokens}
           onClear={clearCanvas}
           canAcceptNext={canAcceptNext}
+          onCalculate={handleCalculate}
+          canCalculate={isComplete}
           droppableId="set-canvas-droppable"
           emptyText="Drag fuzzy sets and operations here to build an expression."
           renderToken={(token) => {
@@ -100,6 +141,15 @@ export function FuzzySetsPage() {
               />
             );
           }}
+        />
+
+        <OutputCanvas
+          result={result}
+          expressionLabel={expressionLabel}
+          draggableId="set-result-drag"
+          dragKind="result-set"
+          isAtCapacity={isAtCapacity}
+          error={calcError}
         />
       </Container>
     </DndContext>

@@ -7,14 +7,25 @@ interface Props {
   onRemoveToken: (instanceId: string) => void;
   onClear: () => void;
   canAcceptNext: (kind: CanvasToken['kind']) => boolean;
+  onCalculate?: () => void;
+  canCalculate?: boolean;
 }
 
-export function ExpressionCanvas({ tokens, onRemoveToken, onClear, canAcceptNext }: Props) {
+export function ExpressionCanvas({
+  tokens,
+  onRemoveToken,
+  onClear,
+  canAcceptNext,
+  onCalculate,
+  canCalculate,
+}: Props) {
   return (
     <SharedExpressionCanvas
       tokens={tokens}
       onClear={onClear}
       canAcceptNext={(kind) => canAcceptNext(kind as CanvasToken['kind'])}
+      onCalculate={onCalculate}
+      canCalculate={canCalculate}
       droppableId="canvas-droppable"
       emptyText="Drag fuzzy numbers and operations here to build an expression."
       renderToken={(token) => {

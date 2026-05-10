@@ -24,11 +24,21 @@ export function useFuzzySets() {
     setSets((prev) => prev.filter((s) => s.id !== id));
   }, []);
 
+  const addSetDirect = useCallback(
+    (points: FuzzyPoint[]): void => {
+      if (isAtCapacity) return;
+      const sorted = [...points].sort((a, b) => a.x - b.x);
+      setSets((prev) => [...prev, { id: crypto.randomUUID(), letter: nextLetter, points: sorted }]);
+      increment();
+    },
+    [nextLetter, increment, isAtCapacity],
+  );
+
   const generateRandom = useCallback(() => {
     if (isAtCapacity) return;
     const points = generateRandomFuzzyPoints();
     addSet(points);
   }, [addSet, isAtCapacity]);
 
-  return { sets, addSet, removeSet, generateRandom, isAtCapacity };
+  return { sets, addSet, addSetDirect, removeSet, generateRandom, isAtCapacity };
 }
