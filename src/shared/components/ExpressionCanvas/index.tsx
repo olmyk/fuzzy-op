@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { Box, Button, Paper, Typography } from '@mui/material';
 import { useDroppable } from '@dnd-kit/core';
+import { DND_IDS } from '@/config/dndIds';
 
 interface Token {
   instanceId: string;
@@ -25,7 +26,7 @@ export function ExpressionCanvas({
   renderToken,
   onCalculate,
   canCalculate = false,
-  droppableId = 'canvas-droppable',
+  droppableId = DND_IDS.NUMBER_CANVAS,
   emptyText = 'Drag items here to build an expression.',
 }: Props) {
   const { isOver, active, setNodeRef } = useDroppable({ id: droppableId });

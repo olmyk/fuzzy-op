@@ -1,5 +1,6 @@
 import type { FuzzyNumber } from '../../types';
 import { FuzzyItemList } from '@/shared/components/FuzzyItemList';
+import { DND_IDS } from '@/config/dndIds';
 
 interface Props {
   numbers: FuzzyNumber[];
@@ -13,7 +14,7 @@ export function FuzzyNumberList({ numbers, addDropZoneId }: Props) {
       items={numbers}
       buildDragId={(item) => `num-${item.id}`}
       buildDragData={(item) => ({ kind: 'number', fuzzyNumberId: item.id, letter: item.letter })}
-      deleteDropZoneId="delete-zone"
+      deleteDropZoneId={DND_IDS.NUMBER_DELETE}
       addDropZoneId={addDropZoneId}
       emptyText="No fuzzy numbers yet."
     />

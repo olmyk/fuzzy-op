@@ -1,4 +1,5 @@
 import type { FuzzyPoint } from '@/shared/types/fuzzy';
+import { Y_TICKS, niceXTicks, fmtTick } from '@/shared/utils/chartUtils';
 
 const LOGICAL_W = 500;
 const LOGICAL_H = 260;
@@ -8,8 +9,6 @@ const PT = 14;
 const PB = 52; // extra bottom padding for legend
 const PW = LOGICAL_W - PL - PR;
 const PH = LOGICAL_H - PT - PB;
-
-const Y_TICKS = [0, 0.25, 0.5, 0.75, 1];
 
 export const GRAPH_COLORS = [
   '#43a047', // A — green
@@ -25,27 +24,6 @@ export const GRAPH_COLORS = [
   '#00acc1', // K — cyan
   '#FFF085', // L — yellow
 ];
-
-function niceStep(rough: number): number {
-  const mag = Math.pow(10, Math.floor(Math.log10(rough)));
-  const n = rough / mag;
-  return n <= 1 ? mag : n <= 2 ? 2 * mag : n <= 5 ? 5 * mag : 10 * mag;
-}
-
-function niceXTicks(min: number, max: number): number[] {
-  if (min === max) return [min];
-  const step = niceStep((max - min) / 4);
-  const start = Math.ceil(min / step) * step;
-  const ticks: number[] = [];
-  for (let t = start; t <= max + step * 1e-9; t = Math.round((t + step) * 1e10) / 1e10) {
-    ticks.push(t);
-  }
-  return ticks;
-}
-
-function fmtTick(n: number): string {
-  return parseFloat(n.toFixed(3)).toString();
-}
 
 function computeDomain(series: SeriesData[]): [number, number] {
   if (series.length === 0) return [0, 1];

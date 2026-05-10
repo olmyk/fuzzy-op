@@ -4,6 +4,7 @@ import { useDndMonitor, type DragStartEvent } from '@dnd-kit/core';
 import type { GraphPanel as GraphPanelType } from '@/shared/hooks/useGraphSection';
 import { GraphPanel } from '@/shared/components/GraphPanel';
 import { DeleteDropZone } from '@/shared/components/DeleteDropZone';
+import { DND_IDS } from '@/config/dndIds';
 
 function PlusIcon() {
   return (
@@ -36,7 +37,7 @@ export function GraphSection({ graphs, onAddGraph }: Props) {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography variant="h6">Graphs</Typography>
-        {isDraggingGraph && <DeleteDropZone droppableId="graph-delete-zone" />}
+        {isDraggingGraph && <DeleteDropZone droppableId={DND_IDS.GRAPH_DELETE} />}
       </Box>
 
       <Box sx={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>

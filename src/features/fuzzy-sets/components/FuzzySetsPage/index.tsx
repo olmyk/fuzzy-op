@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Chip } from '@mui/material';
-import { Box, Container, Typography } from '@mui/material';
+import { Box, Chip, Container, Typography } from '@mui/material';
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { useFuzzySets } from '../../hooks/useFuzzySets';
 import { useFuzzySetCanvas } from '../../hooks/useFuzzySetCanvas';
@@ -14,6 +13,7 @@ import { ExpressionCanvas } from '@/shared/components/ExpressionCanvas';
 import { OutputCanvas } from '@/shared/components/OutputCanvas';
 import { GraphSection } from '@/shared/components/GraphSection';
 import { SetOperationsList } from '../SetOperationsList';
+import { DND_IDS } from '@/config/dndIds';
 
 export function FuzzySetsPage() {
   const { sets, addSet, addSetDirect, removeSet, generateRandom, isAtCapacity } = useFuzzySets();
@@ -55,18 +55,18 @@ export function FuzzySetsPage() {
     const data = active.data.current;
     if (!data) return;
 
-    if (over.id === 'set-delete-zone') {
+    if (over.id === DND_IDS.SET_DELETE) {
       if (data.kind === 'set') removeSet(data.fuzzySetId as string);
       return;
     }
 
-    if (over.id === 'set-add-zone') {
+    if (over.id === DND_IDS.SET_ADD) {
       if (data.kind === 'result-set') addSetDirect(data.points as FuzzyPoint[]);
       return;
     }
 
-    if (typeof over.id === 'string' && over.id.startsWith('graph-panel-')) {
-      const graphId = over.id.replace('graph-panel-', '');
+    if (typeof over.id === 'string' && over.id.startsWith(DND_IDS.GRAPH_PANEL_PREFIX)) {
+      const graphId = over.id.replace(DND_IDS.GRAPH_PANEL_PREFIX, '');
       if (data.kind === 'set') {
         const set = sets.find((s) => s.id === (data.fuzzySetId as string));
         if (set) addSeriesToGraph(graphId, set.id, set.letter, set.points);
@@ -74,12 +74,12 @@ export function FuzzySetsPage() {
       return;
     }
 
-    if (over.id === 'graph-delete-zone') {
+    if (over.id === DND_IDS.GRAPH_DELETE) {
       if (data.kind === 'graph') removeGraph(data.graphId as string);
       return;
     }
 
-    if (over.id === 'set-canvas-droppable') {
+    if (over.id === DND_IDS.SET_CANVAS) {
       addToken(data as Omit<SetCanvasToken, 'instanceId'>);
     }
   }
@@ -109,8 +109,8 @@ export function FuzzySetsPage() {
               items={sets}
               buildDragId={(item) => `set-${item.id}`}
               buildDragData={(item) => ({ kind: 'set', fuzzySetId: item.id, letter: item.letter })}
-              deleteDropZoneId="set-delete-zone"
-              addDropZoneId="set-add-zone"
+              deleteDropZoneId={DND_IDS.SET_DELETE}
+              addDropZoneId={DND_IDS.SET_ADD}
               emptyText="No fuzzy sets yet."
             />
           </Box>
@@ -127,7 +127,7 @@ export function FuzzySetsPage() {
               canAcceptNext={canAcceptNext}
               onCalculate={handleCalculate}
               canCalculate={isComplete}
-              droppableId="set-canvas-droppable"
+              droppableId={DND_IDS.SET_CANVAS}
               emptyText="Drag fuzzy sets and operations here to build an expression."
               renderToken={(token) => {
                 const t = token as SetCanvasToken;

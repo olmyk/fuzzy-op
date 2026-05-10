@@ -3,6 +3,7 @@ import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import type { GraphPanel as GraphPanelType } from '@/shared/hooks/useGraphSection';
 import { MultiSeriesChart } from '@/shared/components/MultiSeriesChart';
+import { DND_IDS } from '@/config/dndIds';
 
 function GripIcon() {
   return (
@@ -23,7 +24,7 @@ interface Props {
 }
 
 export function GraphPanel({ graph, panelIndex }: Props) {
-  const droppableId = `graph-panel-${graph.id}`;
+  const droppableId = `${DND_IDS.GRAPH_PANEL_PREFIX}${graph.id}`;
   const draggableId = `graph-handle-${graph.id}`;
 
   const { isOver, setNodeRef: setDropRef, active } = useDroppable({ id: droppableId });

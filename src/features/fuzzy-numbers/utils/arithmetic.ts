@@ -32,8 +32,6 @@ export function applyFuzzyNumberOp(
           if (pb.x === 0) return 'Division by zero: the divisor contains a point with x = 0.';
           z = pa.x / pb.x;
           break;
-        default:
-          continue;
       }
 
       const zKey = round6(z);

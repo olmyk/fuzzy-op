@@ -7,7 +7,8 @@ import { useGraphSection } from '@/shared/hooks/useGraphSection';
 import type { CanvasToken } from '../../types';
 import type { FuzzyPoint } from '@/shared/types/fuzzy';
 import { evaluateFuzzyExpression } from '../../utils/arithmetic';
-import { FuzzyNumberForm } from '../FuzzyNumberForm';
+import { FuzzyItemForm } from '@/shared/components/FuzzyItemForm';
+import { DND_IDS } from '@/config/dndIds';
 import { FuzzyNumberList } from '../FuzzyNumberList';
 import { OperationsList } from '../OperationsList';
 import { ExpressionCanvas } from '../ExpressionCanvas';
@@ -54,18 +55,18 @@ export function FuzzyNumbersPage() {
     const data = active.data.current;
     if (!data) return;
 
-    if (over.id === 'delete-zone') {
+    if (over.id === DND_IDS.NUMBER_DELETE) {
       if (data.kind === 'number') removeNumber(data.fuzzyNumberId as string);
       return;
     }
 
-    if (over.id === 'num-add-zone') {
+    if (over.id === DND_IDS.NUMBER_ADD) {
       if (data.kind === 'result-number') addNumberDirect(data.points as FuzzyPoint[]);
       return;
     }
 
-    if (typeof over.id === 'string' && over.id.startsWith('graph-panel-')) {
-      const graphId = over.id.replace('graph-panel-', '');
+    if (typeof over.id === 'string' && over.id.startsWith(DND_IDS.GRAPH_PANEL_PREFIX)) {
+      const graphId = over.id.replace(DND_IDS.GRAPH_PANEL_PREFIX, '');
       if (data.kind === 'number') {
         const num = numbers.find((n) => n.id === (data.fuzzyNumberId as string));
         if (num) addSeriesToGraph(graphId, num.id, num.letter, num.points);
@@ -73,12 +74,12 @@ export function FuzzyNumbersPage() {
       return;
     }
 
-    if (over.id === 'graph-delete-zone') {
+    if (over.id === DND_IDS.GRAPH_DELETE) {
       if (data.kind === 'graph') removeGraph(data.graphId as string);
       return;
     }
 
-    if (over.id === 'canvas-droppable') {
+    if (over.id === DND_IDS.NUMBER_CANVAS) {
       addToken(data as Omit<CanvasToken, 'instanceId'>);
     }
   }
@@ -91,16 +92,19 @@ export function FuzzyNumbersPage() {
         </Typography>
 
         <Box sx={{ mb: 3 }}>
-          <FuzzyNumberForm
+          <FuzzyItemForm
+            title="Add Fuzzy Number"
             onAdd={addNumber}
             onGenerateRandom={generateRandom}
             isAtCapacity={isAtCapacity}
+            minPoints={2}
+            capacityMessage="Maximum of 26 fuzzy numbers reached."
           />
         </Box>
 
         <Box sx={{ display: 'flex', gap: 2, mb: 3, minHeight: 280 }}>
           <Box sx={{ flex: 3, minWidth: 0 }}>
-            <FuzzyNumberList numbers={numbers} addDropZoneId="num-add-zone" />
+            <FuzzyNumberList numbers={numbers} addDropZoneId={DND_IDS.NUMBER_ADD} />
           </Box>
           <Box sx={{ flex: 2, minWidth: 0 }}>
             <OperationsList onAdd={addToken} />

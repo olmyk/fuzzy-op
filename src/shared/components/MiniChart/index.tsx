@@ -10,6 +10,9 @@ interface Props {
 
 export function MiniChart({ points }: Props) {
   const sorted = [...points].sort((a, b) => a.x - b.x);
+  if (sorted.length === 0) {
+    return <svg width={CHART_W} height={CHART_H} style={{ display: 'block', flexShrink: 0 }} aria-hidden="true" />;
+  }
   const xMin = sorted[0].x;
   const xMax = sorted[sorted.length - 1].x;
   const xRange = xMax - xMin || 1;

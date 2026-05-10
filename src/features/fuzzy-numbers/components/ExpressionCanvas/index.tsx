@@ -1,6 +1,7 @@
 import { Chip } from '@mui/material';
 import { ExpressionCanvas as SharedExpressionCanvas } from '@/shared/components/ExpressionCanvas';
 import type { CanvasToken } from '../../types';
+import { DND_IDS } from '@/config/dndIds';
 
 interface Props {
   tokens: CanvasToken[];
@@ -26,7 +27,7 @@ export function ExpressionCanvas({
       canAcceptNext={(kind) => canAcceptNext(kind as CanvasToken['kind'])}
       onCalculate={onCalculate}
       canCalculate={canCalculate}
-      droppableId="canvas-droppable"
+      droppableId={DND_IDS.NUMBER_CANVAS}
       emptyText="Drag fuzzy numbers and operations here to build an expression."
       renderToken={(token) => {
         const t = token as CanvasToken;
