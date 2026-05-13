@@ -43,6 +43,7 @@ export interface SeriesData {
   points: FuzzyPoint[];
   color: string;
   showDots?: boolean;
+  showAsHistogram?: boolean;
 }
 
 interface Props {
@@ -92,6 +93,31 @@ export function MultiSeriesChart({ series, emptyText = 'Drop fuzzy items here to
       {series.map((s) => {
         const sorted = [...s.points].sort((a, b) => a.x - b.x);
         if (sorted.length === 0) return null;
+
+        if (s.showAsHistogram) {
+          const barW = Math.max(3, Math.min(20, (PW / (sorted.length + 1)) * 0.6));
+          const baseline = toY(0);
+          return (
+            <g key={s.id}>
+              {sorted.map((p, i) => {
+                const cx = toX(p.x);
+                const top = toY(p.mu);
+                return (
+                  <rect
+                    key={i}
+                    x={cx - barW / 2}
+                    y={top}
+                    width={barW}
+                    height={baseline - top}
+                    fill={s.color}
+                    opacity={0.75}
+                  />
+                );
+              })}
+            </g>
+          );
+        }
+
         const linePts = sorted.map((p) => `${toX(p.x)},${toY(p.mu)}`).join(' ');
         return (
           <g key={s.id}>

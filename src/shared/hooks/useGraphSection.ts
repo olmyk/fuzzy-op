@@ -9,6 +9,7 @@ export interface GraphSeries {
   points: FuzzyPoint[];
   color: string;
   showDots: boolean;
+  showAsHistogram: boolean;
 }
 
 export interface GraphPanel {
@@ -37,7 +38,7 @@ export function useGraphSection() {
   }, []);
 
   const addSeriesToGraph = useCallback(
-    (graphId: string, itemId: string, letter: string, points: FuzzyPoint[], showDots = true) => {
+    (graphId: string, itemId: string, letter: string, points: FuzzyPoint[], showDots = true, showAsHistogram = false) => {
       setGraphs((prev) =>
         prev.map((g) => {
           if (g.id !== graphId) return g;
@@ -49,6 +50,7 @@ export function useGraphSection() {
             points,
             color: colorForItem(letter),
             showDots,
+            showAsHistogram,
           };
           return { ...g, series: [...g.series, newSeries] };
         })

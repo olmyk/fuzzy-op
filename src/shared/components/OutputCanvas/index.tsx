@@ -54,6 +54,7 @@ interface Props {
   isAtCapacity: boolean;
   error?: string | null;
   showDots?: boolean;
+  showAsHistogram?: boolean;
 }
 
 export function OutputCanvas({
@@ -64,6 +65,7 @@ export function OutputCanvas({
   isAtCapacity,
   error,
   showDots = true,
+  showAsHistogram = false,
 }: Props) {
   const hasContent = result !== null || !!error;
 
@@ -95,7 +97,7 @@ export function OutputCanvas({
       {result && !error && (
         <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <Box sx={{ flexShrink: 0 }}>
-            <MembershipChart points={result} showDots={showDots} />
+            <MembershipChart points={result} showDots={showDots} showAsHistogram={showAsHistogram} />
           </Box>
 
           <Box sx={{ flex: 1, minWidth: 200 }}>

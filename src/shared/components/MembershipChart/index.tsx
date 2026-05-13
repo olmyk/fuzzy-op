@@ -13,9 +13,10 @@ const PH = CH - PT - PB;
 interface Props {
   points: FuzzyPoint[];
   showDots?: boolean;
+  showAsHistogram?: boolean;
 }
 
-export function MembershipChart({ points, showDots = true }: Props) {
+export function MembershipChart({ points, showDots = true, showAsHistogram = false }: Props) {
   const sorted = [...points].sort((a, b) => a.x - b.x);
   const hasPoints = sorted.length > 0;
 
@@ -70,22 +71,42 @@ export function MembershipChart({ points, showDots = true }: Props) {
         );
       })}
 
-      {fillPts && <polygon points={fillPts} fill="rgba(25,118,210,0.1)" />}
-
-      {sorted.length >= 2 && (
-        <polyline
-          points={linePts}
-          fill="none"
-          stroke="#1976d2"
-          strokeWidth={2}
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
+      {showAsHistogram ? (
+        (() => {
+          const barW = sorted.length > 0
+            ? Math.max(3, Math.min(20, (PW / (sorted.length + 1)) * 0.6))
+            : 6;
+          const baseline = toY(0);
+          return sorted.map((p, i) => (
+            <rect
+              key={i}
+              x={toX(p.x) - barW / 2}
+              y={toY(p.mu)}
+              width={barW}
+              height={baseline - toY(p.mu)}
+              fill="#1976d2"
+              opacity={0.8}
+            />
+          ));
+        })()
+      ) : (
+        <>
+          {fillPts && <polygon points={fillPts} fill="rgba(25,118,210,0.1)" />}
+          {sorted.length >= 2 && (
+            <polyline
+              points={linePts}
+              fill="none"
+              stroke="#1976d2"
+              strokeWidth={2}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          )}
+          {showDots && sorted.map((p, i) => (
+            <circle key={i} cx={toX(p.x)} cy={toY(p.mu)} r={4} fill="#1976d2" stroke="#fff" strokeWidth={1.5} />
+          ))}
+        </>
       )}
-
-      {showDots && sorted.map((p, i) => (
-        <circle key={i} cx={toX(p.x)} cy={toY(p.mu)} r={4} fill="#1976d2" stroke="#fff" strokeWidth={1.5} />
-      ))}
 
       <line x1={PL} y1={PT} x2={PL} y2={PT + PH} stroke="#666" strokeWidth={1.5} />
       <line x1={PL} y1={PT + PH} x2={PL + PW} y2={PT + PH} stroke="#666" strokeWidth={1.5} />

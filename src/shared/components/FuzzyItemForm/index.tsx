@@ -152,7 +152,7 @@ export function FuzzyItemForm({
         </Box>
 
         <Box sx={{ flexShrink: 0 }}>
-          <MembershipChart points={draftPoints} />
+          <MembershipChart points={draftPoints} showAsHistogram />
         </Box>
       </Box>
     </Paper>

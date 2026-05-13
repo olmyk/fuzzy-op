@@ -40,7 +40,7 @@ function DraggableItem({ item, dragId, dragData }: DraggableItemProps) {
     >
       <Tooltip title={representation} placement="right" arrow>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0, width: '100%' }}>
-          <MiniChart points={item.points} />
+          <MiniChart points={item.points} showAsHistogram={false} />
           <Typography variant="body2" sx={{ fontWeight: 600, flexShrink: 0 }}>
             {item.letter}:
           </Typography>
