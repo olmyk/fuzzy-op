@@ -1,28 +1,28 @@
 import { useState, useEffect } from 'react';
-import { Box, Button, ButtonGroup, Container, Typography } from '@mui/material';
+import { Box, Button, ButtonGroup, Chip, Container, Typography } from '@mui/material';
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
-import { useFuzzyNumbers } from '../../hooks/useFuzzyNumbers';
-import { useCanvas } from '../../hooks/useCanvas';
+import { useFuzzySets } from '../../hooks/useFuzzySets';
+import { useFuzzySetCanvas } from '../../hooks/useFuzzySetCanvas';
 import { useGraphSection } from '@/shared/hooks/useGraphSection';
-import type { CanvasToken } from '../../types';
+import type { SetCanvasToken } from '../../types';
 import type { FuzzyPoint } from '@/shared/types/fuzzy';
-import { evaluateFuzzyExpression } from '../../utils/arithmetic';
+import { evaluateSetExpression } from '../../utils/arithmetic';
 import { FuzzyItemForm } from '@/shared/components/FuzzyItemForm';
 import { FunctionForm } from '@/shared/components/FunctionForm';
-import { DND_IDS } from '@/config/dndIds';
-import { FUNCTION_TYPES_FOR_NUMBERS } from '@/shared/utils/membershipFunctions';
-import { FuzzyNumberList } from '../FuzzyNumberList';
-import { OperationsList } from '../OperationsList';
-import { ExpressionCanvas } from '../ExpressionCanvas';
+import { FuzzyItemList } from '@/shared/components/FuzzyItemList';
+import { ExpressionCanvas } from '@/shared/components/ExpressionCanvas';
 import { OutputCanvas } from '@/shared/components/OutputCanvas';
 import { GraphSection } from '@/shared/components/GraphSection';
+import { SetOperationsList } from '../SetOperationsList';
+import { DND_IDS } from '@/config/dndIds';
+import { FUNCTION_TYPES_FOR_SETS } from '@/shared/utils/membershipFunctions';
 
-export function FuzzyNumbersPage() {
-  const { numbers, addNumber, addNumberDirect, removeNumber, generateRandom, isAtCapacity } = useFuzzyNumbers();
+export function FuzzySetsPage() {
+  const { sets, addSet, addSetDirect, removeSet, generateRandom, isAtCapacity } = useFuzzySets();
   const [inputMode, setInputMode] = useState<'points' | 'function'>('points');
 
-  const pointsCanvas = useCanvas();
-  const functionCanvas = useCanvas();
+  const pointsCanvas = useFuzzySetCanvas();
+  const functionCanvas = useFuzzySetCanvas();
   const pointsGraphs = useGraphSection();
   const functionGraphs = useGraphSection();
 
@@ -46,16 +46,16 @@ export function FuzzyNumbersPage() {
 
   const expressionLabel = tokens
     .map((t) => {
-      if (t.kind === 'number') {
-        const num = numbers.find((n) => n.id === t.fuzzyNumberId);
-        return num?.letter ?? '?';
+      if (t.kind === 'set') {
+        const s = sets.find((s) => s.id === t.fuzzySetId);
+        return s?.letter ?? '?';
       }
       return t.symbol;
     })
     .join(' ');
 
   function handleCalculate() {
-    const outcome = evaluateFuzzyExpression(tokens, numbers);
+    const outcome = evaluateSetExpression(tokens, sets);
     if ('error' in outcome) {
       setCalcError(outcome.error);
       setResult(null);
@@ -71,21 +71,21 @@ export function FuzzyNumbersPage() {
     const data = active.data.current;
     if (!data) return;
 
-    if (over.id === DND_IDS.NUMBER_DELETE) {
-      if (data.kind === 'number') removeNumber(data.fuzzyNumberId as string);
+    if (over.id === DND_IDS.SET_DELETE) {
+      if (data.kind === 'set') removeSet(data.fuzzySetId as string);
       return;
     }
 
-    if (over.id === DND_IDS.NUMBER_ADD) {
-      if (data.kind === 'result-number') addNumberDirect(data.points as FuzzyPoint[]);
+    if (over.id === DND_IDS.SET_ADD) {
+      if (data.kind === 'result-set') addSetDirect(data.points as FuzzyPoint[]);
       return;
     }
 
     if (typeof over.id === 'string' && over.id.startsWith(DND_IDS.GRAPH_PANEL_PREFIX)) {
       const graphId = over.id.replace(DND_IDS.GRAPH_PANEL_PREFIX, '');
-      if (data.kind === 'number') {
-        const num = numbers.find((n) => n.id === (data.fuzzyNumberId as string));
-        if (num) addSeriesToGraph(graphId, num.id, num.letter, num.points, !num.fn, !num.fn);
+      if (data.kind === 'set') {
+        const set = sets.find((s) => s.id === (data.fuzzySetId as string));
+        if (set) addSeriesToGraph(graphId, set.id, set.letter, set.points, !set.fn, !set.fn);
       }
       return;
     }
@@ -95,8 +95,8 @@ export function FuzzyNumbersPage() {
       return;
     }
 
-    if (over.id === DND_IDS.NUMBER_CANVAS) {
-      addToken(data as Omit<CanvasToken, 'instanceId'>);
+    if (over.id === DND_IDS.SET_CANVAS) {
+      addToken(data as Omit<SetCanvasToken, 'instanceId'>);
     }
   }
 
@@ -104,7 +104,7 @@ export function FuzzyNumbersPage() {
     <DndContext onDragEnd={handleDragEnd}>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }} gutterBottom>
-          Fuzzy Number Operations
+          Fuzzy Set Operations
         </Typography>
 
         <Box sx={{ mb: 3 }}>
@@ -127,33 +127,38 @@ export function FuzzyNumbersPage() {
 
           {isPoints ? (
             <FuzzyItemForm
-              title="Add Fuzzy Number"
-              onAdd={addNumber}
+              title="Add Fuzzy Set"
+              onAdd={addSet}
               onGenerateRandom={generateRandom}
               isAtCapacity={isAtCapacity}
-              minPoints={2}
-              capacityMessage="Maximum of 26 fuzzy numbers reached."
+              minPoints={1}
+              capacityMessage="Maximum of 26 fuzzy sets reached."
             />
           ) : (
             <FunctionForm
-              title="Add Fuzzy Number"
-              allowedTypes={FUNCTION_TYPES_FOR_NUMBERS}
-              onAdd={addNumber}
+              title="Add Fuzzy Set"
+              allowedTypes={FUNCTION_TYPES_FOR_SETS}
+              onAdd={addSet}
               isAtCapacity={isAtCapacity}
-              capacityMessage="Maximum of 26 fuzzy numbers reached."
+              capacityMessage="Maximum of 26 fuzzy sets reached."
             />
           )}
         </Box>
 
         <Box sx={{ display: 'flex', gap: 2, mb: 3, minHeight: 280 }}>
           <Box sx={{ flex: 3, minWidth: 0 }}>
-            <FuzzyNumberList
-              numbers={numbers.filter((n) => (isPoints ? !n.fn : !!n.fn))}
-              addDropZoneId={DND_IDS.NUMBER_ADD}
+            <FuzzyItemList
+              title="Fuzzy Sets"
+              items={sets.filter((s) => (isPoints ? !s.fn : !!s.fn))}
+              buildDragId={(item) => `set-${item.id}`}
+              buildDragData={(item) => ({ kind: 'set', fuzzySetId: item.id, letter: item.letter })}
+              deleteDropZoneId={DND_IDS.SET_DELETE}
+              addDropZoneId={DND_IDS.SET_ADD}
+              emptyText="No fuzzy sets yet."
             />
           </Box>
           <Box sx={{ flex: 2, minWidth: 0 }}>
-            <OperationsList onAdd={addToken} />
+            <SetOperationsList onAdd={addToken} />
           </Box>
         </Box>
 
@@ -161,17 +166,49 @@ export function FuzzyNumbersPage() {
           <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <ExpressionCanvas
               tokens={tokens}
-              onRemoveToken={removeToken}
               onClear={clearCanvas}
               canAcceptNext={canAcceptNext}
               onCalculate={handleCalculate}
               canCalculate={isComplete}
+              droppableId={DND_IDS.SET_CANVAS}
+              emptyText="Drag fuzzy sets and operations here to build an expression."
+              renderToken={(token) => {
+                const t = token as SetCanvasToken;
+                if (t.kind === 'set') {
+                  return (
+                    <Chip
+                      label={t.letter}
+                      onDelete={() => removeToken(t.instanceId)}
+                      color="primary"
+                      sx={{ fontWeight: 700, fontSize: '1rem' }}
+                    />
+                  );
+                }
+                if (t.kind === 'complement') {
+                  return (
+                    <Chip
+                      label={t.symbol}
+                      onDelete={() => removeToken(t.instanceId)}
+                      color="secondary"
+                      sx={{ fontWeight: 700, fontSize: '1rem' }}
+                    />
+                  );
+                }
+                return (
+                  <Chip
+                    label={t.symbol}
+                    onDelete={() => removeToken(t.instanceId)}
+                    variant="outlined"
+                    sx={{ fontWeight: 700, fontSize: '1rem' }}
+                  />
+                );
+              }}
             />
             <OutputCanvas
               result={result}
               expressionLabel={expressionLabel}
-              draggableId="num-result-drag"
-              dragKind="result-number"
+              draggableId="set-result-drag"
+              dragKind="result-set"
               isAtCapacity={isAtCapacity}
               error={calcError}
               showDots={isPoints}

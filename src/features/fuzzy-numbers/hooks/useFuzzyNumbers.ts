@@ -1,41 +1,49 @@
 import { useState, useCallback } from 'react';
-import type { FuzzyNumber, FuzzyPoint } from '../types';
-import { validateFuzzyNumber, type ValidationResult } from '../utils/validation';
+import type { FuzzyNumber } from '../types';
+import type { FuzzyPoint, FuzzyItemFn } from '@/shared/types/fuzzy';
+import { validateFuzzyNumber, VALIDATION_MESSAGES } from '../utils/validation';
 import { generateRandomFuzzyPoints } from '../utils/generation';
-import { getLetterForIndex, MAX_FUZZY_NUMBERS } from '../utils/representation';
+import { nextAvailableLetter } from '@/shared/utils/representation';
 
 export function useFuzzyNumbers() {
   const [numbers, setNumbers] = useState<FuzzyNumber[]>([]);
-  // Monotonically increasing — never decremented when a number is deleted,
-  // so letters are never re-assigned after a deletion.
-  const [letterIndex, setLetterIndex] = useState(0);
 
-  const isAtCapacity = letterIndex >= MAX_FUZZY_NUMBERS;
+  const nextLetter = nextAvailableLetter(numbers.map((n) => n.letter));
+  const isAtCapacity = nextLetter === null;
 
   const addNumber = useCallback(
-    (points: FuzzyPoint[]): ValidationResult => {
+    (points: FuzzyPoint[], fn?: FuzzyItemFn): string | null => {
       const result = validateFuzzyNumber(points);
-      if (!result.valid) return result;
+      if (!result.valid) return VALIDATION_MESSAGES[result.reason];
+      if (!nextLetter) return 'Maximum of 26 fuzzy numbers reached.';
 
       const sorted = [...points].sort((a, b) => a.x - b.x);
-      const letter = getLetterForIndex(letterIndex);
-
-      setNumbers((prev) => [...prev, { id: crypto.randomUUID(), letter, points: sorted }]);
-      setLetterIndex((prev) => prev + 1);
-      return { valid: true };
+      const item: FuzzyNumber = { id: crypto.randomUUID(), letter: nextLetter, points: sorted };
+      if (fn) item.fn = fn;
+      setNumbers((prev) => [...prev, item]);
+      return null;
     },
-    [letterIndex],
+    [nextLetter],
   );
 
   const removeNumber = useCallback((id: string) => {
     setNumbers((prev) => prev.filter((n) => n.id !== id));
   }, []);
 
-  const generateRandom = useCallback((): ValidationResult => {
-    if (isAtCapacity) return { valid: false, reason: 'too-few-points' };
+  const addNumberDirect = useCallback(
+    (points: FuzzyPoint[]): void => {
+      if (!nextLetter) return;
+      const sorted = [...points].sort((a, b) => a.x - b.x);
+      setNumbers((prev) => [...prev, { id: crypto.randomUUID(), letter: nextLetter, points: sorted }]);
+    },
+    [nextLetter],
+  );
+
+  const generateRandom = useCallback((): void => {
+    if (isAtCapacity) return;
     const points = generateRandomFuzzyPoints();
-    return addNumber(points);
+    addNumber(points);
   }, [addNumber, isAtCapacity]);
 
-  return { numbers, addNumber, removeNumber, generateRandom, isAtCapacity };
+  return { numbers, addNumber, addNumberDirect, removeNumber, generateRandom, isAtCapacity };
 }

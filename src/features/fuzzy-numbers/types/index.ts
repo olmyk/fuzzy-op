@@ -1,12 +1,11 @@
-export interface FuzzyPoint {
-  x: number;
-  mu: number; // membership degree ∈ [0, 1]
-}
+export type { FuzzyPoint, FuzzyItemFn } from '@/shared/types/fuzzy';
+import type { FuzzyPoint, FuzzyItemFn } from '@/shared/types/fuzzy';
 
 export interface FuzzyNumber {
   id: string;
   letter: string;
-  points: FuzzyPoint[]; // sorted by x ascending
+  points: FuzzyPoint[];
+  fn?: FuzzyItemFn;
 }
 
 export type OperationType = 'addition' | 'subtraction' | 'multiplication' | 'division';

@@ -1,73 +1,86 @@
-# React + TypeScript + Vite
+# fuzzy-op
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive playground for building and evaluating expressions over **fuzzy numbers** and **fuzzy sets**. Define membership functions from a catalogue of standard shapes, drag operands and operators onto a canvas, and see the resulting membership function plotted live.
 
-Currently, two official plugins are available:
+## Description
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The app is split into two workspaces:
 
-## React Compiler
+### Fuzzy numbers
+Arithmetic over fuzzy numbers based on **Zadeh's extension principle** applied to discrete point sets. For each pair of points `(pa, pb)`, the output `z = pa.x op pb.x` is assigned membership `µ = min(pa.µ, pb.µ)`; when multiple pairs collapse to the same `z`, the supremum (max) is kept.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Supported binary operations:
+- Addition (`+`)
+- Subtraction (`−`)
+- Multiplication (`×`)
+- Division (`÷`) — guarded against zero in the divisor's support
 
-## Expanding the ESLint configuration
+### Fuzzy sets
+Set operations evaluated by interpolating both operands onto a merged x-grid:
+- **Union** — `µ_A∪B(x) = max(µ_A(x), µ_B(x))`
+- **Intersection** — `µ_A∩B(x) = min(µ_A(x), µ_B(x))`
+- **Complement** — `µ_∁A(x) = 1 − µ_A(x)` (unary prefix)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Membership functions
+Each operand is sampled from a parametric membership function. Available shapes:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+| Shape | Used for numbers | Used for sets | Parameters |
+| --- | :---: | :---: | --- |
+| Triangle | ✓ | ✓ | `a, b, c` |
+| Trapezoid | ✓ | ✓ | `a, b, c, d` |
+| Gaussian | ✓ | ✓ | `c, σ` |
+| Bell-shaped | ✓ | ✓ | `a, b, c` |
+| Exponential | ✓ | ✓ | `λ, c` |
+| Pi-shape | ✓ | ✓ | `a, b, c, d` |
+| Sigmoid |   | ✓ | `a, c` |
+| S-shape |   | ✓ | `a, b` |
+| Z-shape |   | ✓ | `a, b` |
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Each function is sampled at 80 points across its effective domain to produce the point set used by the arithmetic engine.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Expression canvas
+Operands (letters) and operators are drag-and-drop tokens (powered by `@dnd-kit`). The canvas evaluates the expression left-to-right and renders the result against the inputs in a live chart.
+
+## Tech stack
+
+- **React 19** + **TypeScript** (strict mode, `noUnusedLocals` / `noUnusedParameters`)
+- **Vite 8** — dev server and bundler
+- **React Router 7** — `createBrowserRouter`, central path config in `src/config/paths.ts`
+- **Material UI 9** + **Emotion** — components and styling
+- **@dnd-kit** — drag-and-drop for the expression canvas
+- **ESLint 10** (flat config) with `typescript-eslint` and React hooks plugins
+
+The source layout follows a feature-slice pattern: shared primitives in `src/shared/`, route-bound feature modules in `src/features/<name>/{components,hooks,utils,types}`.
+
+## Installation
+
+### Prerequisites
+- **Node.js** ≥ 20.19 (Vite 8 requirement)
+- **npm** (or any compatible package manager; lockfile is `package-lock.json`)
+
+### Setup
+
+```bash
+git clone <repository-url>
+cd fuzzy-op
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the Vite dev server with HMR (default: http://localhost:5173) |
+| `npm run build` | Type-check (`tsc -b`) then produce a production bundle in `dist/` |
+| `npm run preview` | Serve the built bundle locally to smoke-test the production output |
+| `npm run lint` | Run ESLint over the project (flat config in `eslint.config.js`) |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+No test framework is configured.
+
+## Routes
+
+| Path | View |
+| --- | --- |
+| `/` | Landing page |
+| `/fuzzy-numbers` | Fuzzy number arithmetic workspace |
+| `/fuzzy-sets` | Fuzzy set operations workspace |

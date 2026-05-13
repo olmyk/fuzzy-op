@@ -1,4 +1,4 @@
-import type { FuzzyPoint } from '../types';
+import type { FuzzyPoint } from '@/shared/types/fuzzy';
 
 export function isNormal(points: FuzzyPoint[]): boolean {
   return points.some((p) => p.mu === 1);

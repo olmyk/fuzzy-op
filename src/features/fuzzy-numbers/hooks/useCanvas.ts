@@ -60,5 +60,7 @@ export function useCanvas() {
 
   const clearCanvas = useCallback(() => setTokens([]), []);
 
-  return { tokens, canAcceptNext, addToken, removeToken, clearCanvas };
+  const isComplete = tokens.length > 0 && tokens[tokens.length - 1].kind === 'number';
+
+  return { tokens, canAcceptNext, addToken, removeToken, clearCanvas, isComplete };
 }
