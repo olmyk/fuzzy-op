@@ -29,10 +29,13 @@ export function useFuzzySets() {
   }, []);
 
   const addSetDirect = useCallback(
-    (points: FuzzyPoint[]): void => {
+    (points: FuzzyPoint[], label?: string, fn?: FuzzyItemFn): void => {
       if (!nextLetter) return;
       const sorted = [...points].sort((a, b) => a.x - b.x);
-      setSets((prev) => [...prev, { id: crypto.randomUUID(), letter: nextLetter, points: sorted }]);
+      const item: FuzzySet = { id: crypto.randomUUID(), letter: nextLetter, points: sorted };
+      if (label) item.label = label;
+      if (fn) item.fn = fn;
+      setSets((prev) => [...prev, item]);
     },
     [nextLetter],
   );

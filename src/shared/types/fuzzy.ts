@@ -14,4 +14,5 @@ export interface FuzzyItem {
   letter: string;
   points: FuzzyPoint[]; // sorted by x ascending
   fn?: FuzzyItemFn;
+  label?: string; // display label override (e.g. expression "A + B")
 }

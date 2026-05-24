@@ -6,6 +6,7 @@ export interface FuzzySet {
   letter: string;
   points: FuzzyPoint[];
   fn?: FuzzyItemFn;
+  label?: string;
 }
 
 export type SetCanvasToken =

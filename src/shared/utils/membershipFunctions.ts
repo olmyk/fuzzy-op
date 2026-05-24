@@ -181,6 +181,18 @@ export function evaluateMu(type: FunctionType, params: ParamsByType[FunctionType
 
 const SAMPLE_COUNT = 80;
 
+function getPeakXValues(type: FunctionType, params: ParamsByType[FunctionType]): number[] {
+  switch (type) {
+    case 'triangle':    return [(params as TriangleParams).b];
+    case 'trapezoid':   return [(params as TrapezoidParams).b, (params as TrapezoidParams).c];
+    case 'gaussian':    return [(params as GaussianParams).c];
+    case 'bell':        return [(params as BellParams).c];
+    case 'exponential': return [(params as ExponentialParams).c];
+    case 'pishape':     return [(params as PiShapeParams).b, (params as PiShapeParams).c];
+    default:            return [];
+  }
+}
+
 export function sampleFunction(
   type: FunctionType,
   params: ParamsByType[FunctionType],
@@ -196,6 +208,14 @@ export function sampleFunction(
     const mu = Math.min(1, Math.max(0, evaluateMu(type, params, x)));
     if (mu > 0) points.push({ x, mu });
   }
+
+  for (const px of getPeakXValues(type, params)) {
+    if (!points.some((p) => p.x === px)) {
+      const mu = Math.min(1, Math.max(0, evaluateMu(type, params, px)));
+      if (mu > 0) points.push({ x: px, mu });
+    }
+  }
+  points.sort((a, b) => a.x - b.x);
 
   return points;
 }

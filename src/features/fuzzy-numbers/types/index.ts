@@ -6,6 +6,7 @@ export interface FuzzyNumber {
   letter: string;
   points: FuzzyPoint[];
   fn?: FuzzyItemFn;
+  label?: string;
 }
 
 export type OperationType = 'addition' | 'subtraction' | 'multiplication' | 'division';

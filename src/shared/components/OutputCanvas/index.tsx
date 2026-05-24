@@ -9,6 +9,7 @@ interface DraggableResultProps {
   draggableId: string;
   dragKind: string;
   points: FuzzyPoint[];
+  expressionLabel: string;
 }
 
 function ListAddIcon() {
@@ -19,10 +20,10 @@ function ListAddIcon() {
   );
 }
 
-function DraggableResult({ draggableId, dragKind, points }: DraggableResultProps) {
+function DraggableResult({ draggableId, dragKind, points, expressionLabel }: DraggableResultProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: draggableId,
-    data: { kind: dragKind, points },
+    data: { kind: dragKind, points, expressionLabel },
   });
 
   return (
@@ -79,7 +80,7 @@ export function OutputCanvas({
               List is at capacity — cannot add result.
             </Typography>
           ) : (
-            <DraggableResult draggableId={draggableId} dragKind={dragKind} points={result} />
+            <DraggableResult draggableId={draggableId} dragKind={dragKind} points={result} expressionLabel={expressionLabel} />
           )
         )}
       </Box>
