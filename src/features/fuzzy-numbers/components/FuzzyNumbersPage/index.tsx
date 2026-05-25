@@ -5,7 +5,7 @@ import { useFuzzyNumbers } from '../../hooks/useFuzzyNumbers';
 import { useCanvas } from '../../hooks/useCanvas';
 import { useGraphSection } from '@/shared/hooks/useGraphSection';
 import type { CanvasToken } from '../../types';
-import type { FuzzyPoint } from '@/shared/types/fuzzy';
+import type { FuzzyPoint, FuzzyItemFn } from '@/shared/types/fuzzy';
 import { evaluateFuzzyExpression } from '../../utils/arithmetic';
 import { FuzzyItemForm } from '@/shared/components/FuzzyItemForm';
 import { FunctionForm } from '@/shared/components/FunctionForm';
@@ -77,7 +77,13 @@ export function FuzzyNumbersPage() {
     }
 
     if (over.id === DND_IDS.NUMBER_ADD) {
-      if (data.kind === 'result-number') addNumberDirect(data.points as FuzzyPoint[]);
+      if (data.kind === 'result-number') {
+        const label = data.expressionLabel as string | undefined;
+        const fn: FuzzyItemFn | undefined = !isPoints && label
+          ? { type: 'expression', params: {}, label }
+          : undefined;
+        addNumberDirect(data.points as FuzzyPoint[], label, fn);
+      }
       return;
     }
 
@@ -85,7 +91,10 @@ export function FuzzyNumbersPage() {
       const graphId = over.id.replace(DND_IDS.GRAPH_PANEL_PREFIX, '');
       if (data.kind === 'number') {
         const num = numbers.find((n) => n.id === (data.fuzzyNumberId as string));
-        if (num) addSeriesToGraph(graphId, num.id, num.letter, num.points, !num.fn, !num.fn);
+        if (num) {
+          const isRaw = !num.fn && !num.label;
+          addSeriesToGraph(graphId, num.id, num.letter, num.points, isRaw, isRaw);
+        }
       }
       return;
     }
@@ -174,8 +183,8 @@ export function FuzzyNumbersPage() {
               dragKind="result-number"
               isAtCapacity={isAtCapacity}
               error={calcError}
-              showDots={isPoints}
-              showAsHistogram={isPoints}
+              showDots={false}
+              showAsHistogram={false}
             />
           </Box>
           <Box sx={{ flex: 2, minWidth: 0 }}>

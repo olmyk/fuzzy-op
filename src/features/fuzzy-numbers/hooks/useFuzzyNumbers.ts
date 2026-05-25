@@ -31,10 +31,13 @@ export function useFuzzyNumbers() {
   }, []);
 
   const addNumberDirect = useCallback(
-    (points: FuzzyPoint[]): void => {
+    (points: FuzzyPoint[], label?: string, fn?: FuzzyItemFn): void => {
       if (!nextLetter) return;
       const sorted = [...points].sort((a, b) => a.x - b.x);
-      setNumbers((prev) => [...prev, { id: crypto.randomUUID(), letter: nextLetter, points: sorted }]);
+      const item: FuzzyNumber = { id: crypto.randomUUID(), letter: nextLetter, points: sorted };
+      if (label) item.label = label;
+      if (fn) item.fn = fn;
+      setNumbers((prev) => [...prev, item]);
     },
     [nextLetter],
   );

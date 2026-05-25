@@ -15,7 +15,8 @@ interface DraggableItemProps {
 }
 
 function DraggableItem({ item, dragId, dragData }: DraggableItemProps) {
-  const representation = item.fn ? item.fn.label : toSetNotation(item.points);
+  const representation = item.label ?? (item.fn ? item.fn.label : toSetNotation(item.points));
+  const tooltip = toSetNotation(item.points);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: dragId,
     data: dragData,
@@ -38,7 +39,7 @@ function DraggableItem({ item, dragId, dragData }: DraggableItemProps) {
         userSelect: 'none',
       }}
     >
-      <Tooltip title={representation} placement="right" arrow>
+      <Tooltip title={tooltip} placement="right" arrow>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0, width: '100%' }}>
           <MiniChart points={item.points} showAsHistogram={false} />
           <Typography variant="body2" sx={{ fontWeight: 600, flexShrink: 0 }}>

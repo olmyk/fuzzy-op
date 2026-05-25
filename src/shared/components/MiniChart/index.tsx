@@ -11,6 +11,7 @@ interface Props {
 
 export function MiniChart({ points, showAsHistogram = false }: Props) {
   const sorted = [...points].sort((a, b) => a.x - b.x);
+
   if (sorted.length === 0) {
     return <svg width={CHART_W} height={CHART_H} style={{ display: 'block', flexShrink: 0 }} aria-hidden="true" />;
   }

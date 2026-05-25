@@ -5,7 +5,7 @@ import { useFuzzySets } from '../../hooks/useFuzzySets';
 import { useFuzzySetCanvas } from '../../hooks/useFuzzySetCanvas';
 import { useGraphSection } from '@/shared/hooks/useGraphSection';
 import type { SetCanvasToken } from '../../types';
-import type { FuzzyPoint } from '@/shared/types/fuzzy';
+import type { FuzzyPoint, FuzzyItemFn } from '@/shared/types/fuzzy';
 import { evaluateSetExpression } from '../../utils/arithmetic';
 import { FuzzyItemForm } from '@/shared/components/FuzzyItemForm';
 import { FunctionForm } from '@/shared/components/FunctionForm';
@@ -77,7 +77,13 @@ export function FuzzySetsPage() {
     }
 
     if (over.id === DND_IDS.SET_ADD) {
-      if (data.kind === 'result-set') addSetDirect(data.points as FuzzyPoint[]);
+      if (data.kind === 'result-set') {
+        const label = data.expressionLabel as string | undefined;
+        const fn: FuzzyItemFn | undefined = !isPoints && label
+          ? { type: 'expression', params: {}, label }
+          : undefined;
+        addSetDirect(data.points as FuzzyPoint[], label, fn);
+      }
       return;
     }
 
@@ -85,7 +91,10 @@ export function FuzzySetsPage() {
       const graphId = over.id.replace(DND_IDS.GRAPH_PANEL_PREFIX, '');
       if (data.kind === 'set') {
         const set = sets.find((s) => s.id === (data.fuzzySetId as string));
-        if (set) addSeriesToGraph(graphId, set.id, set.letter, set.points, !set.fn, !set.fn);
+        if (set) {
+          const isRaw = !set.fn && !set.label;
+          addSeriesToGraph(graphId, set.id, set.letter, set.points, isRaw, isRaw);
+        }
       }
       return;
     }
@@ -211,8 +220,8 @@ export function FuzzySetsPage() {
               dragKind="result-set"
               isAtCapacity={isAtCapacity}
               error={calcError}
-              showDots={isPoints}
-              showAsHistogram={isPoints}
+              showDots={false}
+              showAsHistogram={false}
             />
           </Box>
           <Box sx={{ flex: 2, minWidth: 0 }}>
