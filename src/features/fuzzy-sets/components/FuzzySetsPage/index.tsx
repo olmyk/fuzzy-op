@@ -91,7 +91,10 @@ export function FuzzySetsPage() {
       const graphId = over.id.replace(DND_IDS.GRAPH_PANEL_PREFIX, '');
       if (data.kind === 'set') {
         const set = sets.find((s) => s.id === (data.fuzzySetId as string));
-        if (set) addSeriesToGraph(graphId, set.id, set.letter, set.points, !set.fn, !set.fn);
+        if (set) {
+          const isRaw = !set.fn && !set.label;
+          addSeriesToGraph(graphId, set.id, set.letter, set.points, isRaw, isRaw);
+        }
       }
       return;
     }
@@ -217,8 +220,8 @@ export function FuzzySetsPage() {
               dragKind="result-set"
               isAtCapacity={isAtCapacity}
               error={calcError}
-              showDots={isPoints}
-              showAsHistogram={isPoints}
+              showDots={false}
+              showAsHistogram={false}
             />
           </Box>
           <Box sx={{ flex: 2, minWidth: 0 }}>

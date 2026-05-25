@@ -20,6 +20,8 @@ export function MembershipChart({ points, showDots = true, showAsHistogram = fal
   const sorted = [...points].sort((a, b) => a.x - b.x);
   const hasPoints = sorted.length > 0;
 
+  showAsHistogram = false;
+
   let xMin: number, xMax: number;
   if (!hasPoints) {
     xMin = 0; xMax = 1;

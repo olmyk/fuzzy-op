@@ -94,6 +94,8 @@ export function MultiSeriesChart({ series, emptyText = 'Drop fuzzy items here to
         const sorted = [...s.points].sort((a, b) => a.x - b.x);
         if (sorted.length === 0) return null;
 
+        s.showAsHistogram = false;
+                
         if (s.showAsHistogram) {
           const barW = Math.max(3, Math.min(20, (PW / (sorted.length + 1)) * 0.6));
           const baseline = toY(0);

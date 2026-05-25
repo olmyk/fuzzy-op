@@ -91,7 +91,10 @@ export function FuzzyNumbersPage() {
       const graphId = over.id.replace(DND_IDS.GRAPH_PANEL_PREFIX, '');
       if (data.kind === 'number') {
         const num = numbers.find((n) => n.id === (data.fuzzyNumberId as string));
-        if (num) addSeriesToGraph(graphId, num.id, num.letter, num.points, !num.fn, !num.fn);
+        if (num) {
+          const isRaw = !num.fn && !num.label;
+          addSeriesToGraph(graphId, num.id, num.letter, num.points, isRaw, isRaw);
+        }
       }
       return;
     }
@@ -180,8 +183,8 @@ export function FuzzyNumbersPage() {
               dragKind="result-number"
               isAtCapacity={isAtCapacity}
               error={calcError}
-              showDots={isPoints}
-              showAsHistogram={isPoints}
+              showDots={false}
+              showAsHistogram={false}
             />
           </Box>
           <Box sx={{ flex: 2, minWidth: 0 }}>
